@@ -1,0 +1,52 @@
+name: Bug report
+description: Report incorrect localMCP-chat behavior.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security issues belong in private vulnerability reporting, not a public issue.
+        Remove credentials, private file contents/paths, tunnel URLs, and account identifiers.
+  - type: input
+    id: version
+    attributes:
+      label: localMCP-chat version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - "Windows x64"
+        - "Windows ARM64"
+        - "Linux x64"
+        - "Linux ARM64"
+    validations:
+      required: true
+  - type: textarea
+    id: permissions
+    attributes:
+      label: Enabled capabilities / tunnel mode
+      description: List Read, Write, Shell, Git, Plugins state and OpenAI/cloudflared/manual tunnel mode. Do not include secrets or tunnel URLs.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what happened, and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant redacted diagnostics
+      render: text

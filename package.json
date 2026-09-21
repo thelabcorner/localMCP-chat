@@ -1,0 +1,71 @@
+{
+  "name": "localmcp-chat",
+  "version": "0.2.0",
+  "description": "Local MCP tunnel and capability router for ChatGPT with approved-folder coding tools and pluggable MCP integrations.",
+  "license": "MIT",
+  "author": "localMCP-chat contributors",
+  "desktopName": "dev.localmcp.chat.desktop",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node -e \"require('electron')\" && vitest run --config vitest.clean.config.ts",
+    "test:watch": "vitest",
+    "verify": "npm run typecheck && npm test && npm run build",
+    "verify:notices": "node scripts/generate-third-party-notices.mjs --check",
+    "verify:privacy": "node scripts/verify-public-history.mjs",
+    "verify:ci": "npm run verify && npm run verify:notices && npm run verify:privacy",
+    "verify:tunnel-current": "node scripts/verify-current-tunnel.mjs",
+    "hooks:install": "node scripts/install-git-hooks.mjs",
+    "icon": "node scripts/make-icon.mjs",
+    "tunnel": "node scripts/fetch-tunnel-client.mjs",
+    "rg": "node scripts/fetch-ripgrep.mjs",
+    "packaging:prepare": "node scripts/prepare-packaging-native.mjs",
+    "dist": "node scripts/package.mjs --arch x64,arm64",
+    "dist:win": "node scripts/package.mjs --platform win32 --arch x64,arm64",
+    "dist:x64": "node scripts/package.mjs --platform win32 --arch x64",
+    "dist:arm64": "node scripts/package.mjs --platform win32 --arch arm64",
+    "dist:linux": "node scripts/package.mjs --platform linux --arch x64,arm64",
+    "dist:linux:x64": "node scripts/package.mjs --platform linux --arch x64",
+    "dist:linux:arm64": "node scripts/package.mjs --platform linux --arch arm64",
+    "dist:dir": "node scripts/package.mjs --arch x64,arm64 --dir",
+    "dist:dir:win": "node scripts/package.mjs --platform win32 --arch x64,arm64 --dir",
+    "dist:dir:x64": "node scripts/package.mjs --platform win32 --arch x64 --dir",
+    "dist:dir:arm64": "node scripts/package.mjs --platform win32 --arch arm64 --dir",
+    "dist:dir:linux:x64": "node scripts/package.mjs --platform linux --arch x64 --dir",
+    "dist:dir:linux:arm64": "node scripts/package.mjs --platform linux --arch arm64 --dir",
+    "dist:dir:linux": "node scripts/package.mjs --platform linux --arch x64,arm64 --dir",
+    "test:kill": "node scripts/kill-stray-vitest.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/mcpb": "^2.1.2",
+    "@modelcontextprotocol/client": "^2.0.0",
+    "@modelcontextprotocol/node": "^2.0.0",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "bson": "^6.10.3",
+    "diff": "^8.0.2",
+    "fflate": "^0.8.3",
+    "hono": "4.13.5",
+    "jsonc-parser": "^3.3.1",
+    "node-pty": "1.2.0-beta.15",
+    "seek-bzip": "^2.0.0",
+    "typescript-compiler": "npm:typescript@^5.9.3",
+    "yaml": "^2.9.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "electron": "43.4.1",
+    "electron-builder": "^26.15.7",
+    "electron-vite": "^5.0.0",
+    "typescript": "^7.0.2",
+    "vite": "^7.3.6",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "@anthropic-ai/mcpb": {
+      "tmp": "0.2.7"
+    }
+  }
+}

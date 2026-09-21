@@ -1,0 +1,37 @@
+# localMCP-chat deployment schema v1
+#
+# This file is intentionally secret-free. Never put an OpenAI API key here.
+# Create a separate ChatGPT custom app / Secure MCP Tunnel for this machine and give that app the
+# same human-facing name as connectorName below.
+version: 1
+connectorName: localMCP-homelab
+
+roots:
+  - name: projects
+    path: C:\Users\REPLACE_ME\WebstormProjects
+  # Add more non-overlapping folders as needed. Do not approve an entire drive.
+  # - name: homelab
+  #   path: D:\homelab
+
+permissions:
+  read: true
+  write: true
+  shell: true
+  git: true
+  plugins: true
+  # FILE_TRANSFER ingress is enabled; local -> OpenAI egress remains explicit opt-in.
+  filesReceive: true
+  filesSend: false
+
+tunnel:
+  kind: openai
+  # IMPORTANT: use a tunnel ID created for the homelab custom app, not the workstation tunnel.
+  tunnelId: tunnel_REPLACE_WITH_32_LOWERCASE_HEX
+  binaryPath: ""
+
+preferences:
+  # Recommended Windows homelab profile: starts per-user at logon, stays in the tray, and connects.
+  launchAtLogin: true
+  startHidden: true
+  autoConnect: true
+  closeToTray: true

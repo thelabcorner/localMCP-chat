@@ -1,0 +1,83 @@
+name: Publish release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - name: Require a version tag
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_TYPE" = tag || { echo "Dispatch publish.yml at a tag." >&2; exit 1; }
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Require package/tag agreement
+        run: node -e "const v=require('./package.json').version;if(process.env.TAG!=='v'+v)throw new Error('Tag '+process.env.TAG+' does not match package version '+v)"
+      - run: npm run verify:ci
+      - run: npm run verify:tunnel-current
+      - run: node scripts/check-release-absent.mjs
+
+  candidate:
+    name: Build candidate
+    needs: preflight
+    uses: ./.github/workflows/release.yml
+
+  publish:
+    name: Publish
+    needs: candidate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: localmcp-chat-candidate-${{ github.run_id }}
+          path: publish
+      - name: Re-verify checksums
+        working-directory: publish
+        run: sha256sum -c SHA256SUMS.txt
+      - name: Publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_TYPE" = tag
+          npm run verify:tunnel-current
+          node scripts/check-release-absent.mjs
+          gh release create "$TAG" \
+            publish/localMCP-chat-Setup-x64.exe \
+            publish/localMCP-chat-Setup-arm64.exe \
+            publish/localMCP-chat-Linux-x64.AppImage \
+            publish/localMCP-chat-Linux-x64.deb \
+            publish/localMCP-chat-Linux-arm64.AppImage \
+            publish/localMCP-chat-Linux-arm64.deb \
+            publish/SHA256SUMS.txt \
+            --title "localMCP-chat $TAG" \
+            --generate-notes

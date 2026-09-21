@@ -1,0 +1,123 @@
+name: Release candidate
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Package ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            platform: win32
+            arch: x64
+            runner: windows-2025
+            script: dist:x64
+            artifact: package-windows-x64
+            files: release/localMCP-chat-Setup-x64.exe
+          - name: Windows arm64
+            platform: win32
+            arch: arm64
+            runner: windows-11-arm
+            script: dist:arm64
+            artifact: package-windows-arm64
+            files: release/localMCP-chat-Setup-arm64.exe
+          - name: Linux x64
+            platform: linux
+            arch: x64
+            runner: ubuntu-24.04
+            script: dist:linux:x64
+            artifact: package-linux-x64
+            files: |
+              release/localMCP-chat-Linux-x64.AppImage
+              release/localMCP-chat-Linux-x64.deb
+          - name: Linux arm64
+            platform: linux
+            arch: arm64
+            runner: ubuntu-24.04-arm
+            script: dist:linux:arm64
+            artifact: package-linux-arm64
+            files: |
+              release/localMCP-chat-Linux-arm64.AppImage
+              release/localMCP-chat-Linux-arm64.deb
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          architecture: ${{ matrix.arch }}
+          cache: npm
+      - run: npm ci
+      - name: Verify tag matches package version
+        if: github.ref_type == 'tag'
+        run: node -e "const v=require('./package.json').version;if(process.env.GITHUB_REF_NAME!=='v'+v)throw new Error('Tag '+process.env.GITHUB_REF_NAME+' does not match '+v)"
+      - run: npm run verify:ci
+      - name: Prove native runner target
+        run: node -e "if(process.platform!=='${{ matrix.platform }}'||process.arch!=='${{ matrix.arch }}')throw new Error('Expected ${{ matrix.platform }}-${{ matrix.arch }}, got '+process.platform+'-'+process.arch)"
+      - name: Package
+        run: npm run ${{ matrix.script }}
+      - name: Smoke packaged native runtime
+        run: node scripts/smoke-packaged-runtime.mjs --platform ${{ matrix.platform }} --arch ${{ matrix.arch }}
+      - name: Prove Ubuntu 20.04 / glibc 2.31 compatibility
+        if: matrix.platform == 'linux' && matrix.arch == 'x64'
+        shell: bash
+        run: bash scripts/smoke-linux-focal.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.files }}
+          if-no-files-found: error
+          retention-days: 30
+
+  assemble:
+    name: Assemble release candidate
+    needs: [package]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: package-*
+          path: release
+          merge-multiple: true
+      - name: Create SHA-256 checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            localMCP-chat-Setup-x64.exe
+            localMCP-chat-Setup-arm64.exe
+            localMCP-chat-Linux-x64.AppImage
+            localMCP-chat-Linux-x64.deb
+            localMCP-chat-Linux-arm64.AppImage
+            localMCP-chat-Linux-arm64.deb
+          )
+          for file in "${files[@]}"; do test -f "release/$file" || { echo "Missing release/$file" >&2; exit 1; }; done
+          (cd release && sha256sum "${files[@]}" > SHA256SUMS.txt)
+          cat release/SHA256SUMS.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: localmcp-chat-candidate-${{ github.run_id }}
+          path: |
+            release/localMCP-chat-Setup-x64.exe
+            release/localMCP-chat-Setup-arm64.exe
+            release/localMCP-chat-Linux-x64.AppImage
+            release/localMCP-chat-Linux-x64.deb
+            release/localMCP-chat-Linux-arm64.AppImage
+            release/localMCP-chat-Linux-arm64.deb
+            release/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
