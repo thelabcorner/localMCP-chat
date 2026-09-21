@@ -8,7 +8,7 @@ Node.js 22+ is required.
 
 ```sh
 npm ci
-npm run verify
+npm run verify:ci
 npm run dev
 ```
 
@@ -16,7 +16,7 @@ Read [`AGENTS.md`](AGENTS.md) before changing architecture-sensitive code. Keep 
 
 ## Design constraints
 
-- Keep one connector named `localMCP-chat`.
+- Keep one MCP connector instance per application process; its advertised identity may be configured per machine.
 - Browser/ChatGPT DOM automation, conversation recording, worker agents and computer-use are intentionally out of scope.
 - Built-in filesystem tools stay inside explicitly approved roots.
 - Runtime permission checks are authoritative even if an MCP client cached an older schema.

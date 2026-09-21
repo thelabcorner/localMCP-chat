@@ -137,7 +137,7 @@ Development:
 
 ```powershell
 npm ci
-npm run verify
+npm run verify:ci
 npm run dev
 ```
 

@@ -10,7 +10,7 @@ Use the repository host's private vulnerability-reporting mechanism for security
 
 - MCP binds to loopback on an unguessable path. Remote reachability exists only through the configured tunnel.
 - Built-in filesystem operations canonicalize paths and enforce explicit approved roots.
-- Read, Write, Shell, Git, and Plugins are independently switchable. Every call checks current state; schema discovery is not authorization.
+- Read, Write, Receive files, Send files to OpenAI, Shell, Git, and Plugins are independently switchable. Every call checks current state; schema discovery is not authorization.
 - A known stale read blocks a write until the file is reread.
 - Multi-file patches preflight before commit and use compare-before-restore rollback so recovery cannot overwrite a newer external edit.
 - `exec_command` and background shell jobs run with the normal privileges of the logged-in OS account. Starting inside an approved root does **not** kernel-sandbox arbitrary commands.
