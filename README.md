@@ -41,6 +41,31 @@ Every official release includes `SHA256SUMS.txt`. Verify downloaded bytes before
 
 Release binaries are currently unsigned. Windows SmartScreen or endpoint-security software may warn on first launch; use the published SHA-256 manifest as the integrity check and do not bypass a mismatched artifact.
 
+### Install
+
+**Windows**
+
+1. Download the installer matching your CPU architecture.
+2. Verify its SHA-256 digest against `SHA256SUMS.txt`.
+3. Run `localMCP-chat-Setup-x64.exe` or `localMCP-chat-Setup-arm64.exe`.
+
+**Linux AppImage**
+
+```sh
+chmod +x localMCP-chat-Linux-x64.AppImage
+./localMCP-chat-Linux-x64.AppImage
+```
+
+Use the `arm64` artifact on ARM64 hosts.
+
+**Debian / Ubuntu**
+
+```sh
+sudo apt install ./localMCP-chat-Linux-x64.deb
+```
+
+Official binaries are built by the repository release workflow from the tagged source revision. The release page publishes the Windows and Linux artifacts together with one checksum manifest.
+
 ## Tool surface
 
 The built-in surface stays compact, but now includes the high-frequency structured tools from the OpenCode fork so ChatGPT does not have to reconstruct the same operations with repeated reads and shell commands:

@@ -4,6 +4,14 @@
   "description": "Local MCP tunnel and capability router for ChatGPT with approved-folder coding tools and pluggable MCP integrations.",
   "license": "MIT",
   "author": "localMCP-chat contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thelabcorner/localMCP-chat.git"
+  },
+  "homepage": "https://github.com/thelabcorner/localMCP-chat#readme",
+  "bugs": {
+    "url": "https://github.com/thelabcorner/localMCP-chat/issues"
+  },
   "desktopName": "dev.localmcp.chat.desktop",
   "main": "out/main/index.js",
   "scripts": {

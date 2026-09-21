@@ -4,15 +4,13 @@ import { spawnSync } from 'node:child_process';
 const maintainerLogin = 'thelabcorner';
 const safeMaintainerEmail = /^(?:\d+\+)?thelabcorner@users\.noreply\.github\.com$/i;
 
-// Keep blocked values split so the guard itself never embeds what it rejects.
+// Keep this list limited to non-secret structural markers. Never teach the public
+// guard private addresses, usernames, hostnames, project names, or credentials:
+// a privacy checker must not become a disclosure vector itself.
 const blockedText = [
-  { label: 'private legacy maintainer email', value: ['totec448', 'gmail.com'].join('@') },
   { label: 'Claude session trailer', value: ['Claude', 'Session:'].join('-') },
   { label: 'Claude session URL', value: ['https://claude.ai/code/', 'session_'].join('') },
-  { label: 'private Windows user path', value: ['C:', 'Users', ['sloo', 'shied'].join('')].join('\\') },
   { label: 'private workspace root', value: ['', 'webstormprojects', ''].join('/') },
-  { label: 'private project marker', value: ['presgen', 'v2'].join('_') },
-  { label: 'private homelab hostname', value: ['DESKTOP', '2SRVVNA'].join('-') },
 ];
 
 function runGit(args, { allowFailure = false, encoding = 'utf8' } = {}) {
