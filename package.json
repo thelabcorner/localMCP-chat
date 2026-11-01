@@ -60,7 +60,7 @@
     "seek-bzip": "^2.0.0",
     "typescript-compiler": "npm:typescript@^5.9.3",
     "yaml": "^2.9.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
